@@ -1,13 +1,13 @@
 package com.example.bai2.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class HomeController {
 
-    @GetMapping("/")
-    public String home() {
-        return "Xin chào các bạn";
+    @GetMapping("/home")
+    public String index() {
+        return "index";
     }
 }
