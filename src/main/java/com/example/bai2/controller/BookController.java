@@ -2,7 +2,6 @@ package com.example.bai2.controller;
 
 import com.example.bai2.model.Book;
 import com.example.bai2.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +10,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/books")
 public class BookController {
 
-    @Autowired
-    private BookService bookService;
+    private final BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @GetMapping
     public String listBooks(Model model) {
@@ -37,8 +39,12 @@ public class BookController {
     // Hiển thị form sửa sách
     @GetMapping("/edit/{id}")
     public String editBookForm(@PathVariable Long id, Model model) {
-        bookService.getBookById(id).ifPresent(book -> model.addAttribute("book", book));
-        return "edit-book";
+        return bookService.getBookById(id)
+                .map(book -> {
+                    model.addAttribute("book", book);
+                    return "edit-book";
+                })
+                .orElse("redirect:/books");
     }
 
     // Cập nhật sách

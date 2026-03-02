@@ -1,31 +1,52 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Danh sách sách</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách sách - Thư viện sách</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
 </head>
 <body>
-    <h1>Danh sách sách</h1>
-    <a href="/books/add">Thêm sách mới</a>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tiêu đề</th>
-                <th>Tác giả</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="book : ${books}">
-                <td th:text="${book.id}"></td>
-                <td th:text="${book.title}"></td>
-                <td th:text="${book.author}"></td>
-                <td>
-                    <a th:href="@{/books/edit/{id}(id=${book.id})}">Sửa</a>
-                    <a th:href="@{/books/delete/{id}(id=${book.id})}">Xóa</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <main class="page">
+        <section class="card">
+            <div class="topbar">
+                <div>
+                    <h1>Danh sách sách</h1>
+                    <p class="subtitle">Theo dõi thông tin các đầu sách đang có trong thư viện.</p>
+                </div>
+                <div class="actions">
+                    <a class="btn btn-light" th:href="@{/}" href="/">Trang chủ</a>
+                    <a class="btn" th:href="@{/books/add}" href="/books/add">Thêm sách mới</a>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tiêu đề</th>
+                            <th>Tác giả</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(books)}">
+                            <td colspan="4" class="empty-row">Chưa có sách nào. Hãy thêm sách mới.</td>
+                        </tr>
+                        <tr th:each="book : ${books}">
+                            <td th:text="${book.id}"></td>
+                            <td th:text="${book.title}"></td>
+                            <td th:text="${book.author}"></td>
+                            <td class="actions-cell">
+                                <a class="btn btn-small btn-secondary" th:href="@{/books/edit/{id}(id=${book.id})}">Sửa</a>
+                                <a class="btn btn-small btn-danger" th:href="@{/books/delete/{id}(id=${book.id})}" onclick="return confirm('Bạn có chắc muốn xóa sách này?');">Xóa</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

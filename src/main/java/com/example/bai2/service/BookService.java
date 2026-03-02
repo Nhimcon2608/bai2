@@ -1,41 +1,37 @@
 package com.example.bai2.service;
 
 import com.example.bai2.model.Book;
+import com.example.bai2.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class BookService {
-    private List<Book> books = new ArrayList<>();
-    private Long nextId = 1L;
+    private final BookRepository bookRepository;
+
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
 
     public List<Book> getAllBooks() {
-        return books;
+        return bookRepository.findAll();
     }
 
     public void addBook(Book book) {
-        book.setId(nextId++);
-        books.add(book);
+        bookRepository.save(book);
     }
 
     public Optional<Book> getBookById(Long id) {
-        return books.stream().filter(book -> book.getId().equals(id)).findFirst();
+        return bookRepository.findById(id);
     }
 
     public void updateBook(Book updatedBook) {
-        books.stream()
-                .filter(book -> book.getId().equals(updatedBook.getId()))
-                .findFirst()
-                .ifPresent(book -> {
-                    book.setTitle(updatedBook.getTitle());
-                    book.setAuthor(updatedBook.getAuthor());
-                });
+        bookRepository.save(updatedBook);
     }
 
     public void deleteBook(Long id) {
-        books.removeIf(book -> book.getId().equals(id));
+        bookRepository.deleteById(id);
     }
 }

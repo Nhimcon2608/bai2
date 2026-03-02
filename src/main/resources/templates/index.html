@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện sách</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
 </head>
 <body>
-    <h1>Hello </h1>
+    <main class="page">
+        <section class="card hero">
+            <span class="badge">Quản lý sách</span>
+            <h1>Thư viện sách</h1>
+            <p>Hệ thống quản lý danh mục sách đơn giản, trực quan và dễ thao tác.</p>
+            <div class="actions">
+                <a class="btn" th:href="@{/books}" href="/books">Xem danh sách sách</a>
+                <a class="btn btn-secondary" th:href="@{/books/add}" href="/books/add">Thêm sách mới</a>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
