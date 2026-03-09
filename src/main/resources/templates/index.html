@@ -1,21 +1,81 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thư viện sách</title>
+    <title>Dashboard - Product Hub</title>
     <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
 </head>
 <body>
-    <main class="page">
-        <section class="card hero">
-            <span class="badge">Quản lý sách</span>
-            <h1>Thư viện sách</h1>
-            <p>Hệ thống quản lý danh mục sách đơn giản, trực quan và dễ thao tác.</p>
-            <div class="actions">
-                <a class="btn" th:href="@{/books}" href="/books">Xem danh sách sách</a>
-                <a class="btn btn-secondary" th:href="@{/books/add}" href="/books/add">Thêm sách mới</a>
+    <header class="site-header">
+        <div class="header-inner">
+            <div>
+                <p class="eyebrow">Product Hub</p>
+                <h1 class="brand">Quản trị sản phẩm</h1>
             </div>
+            <div class="header-actions">
+                <p class="user-chip">
+                    <span>Xin chào,</span>
+                    <strong sec:authentication="name">admin</strong>
+                </p>
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn-light" type="submit">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <main class="page page-wide">
+        <section class="glass-panel">
+            <div class="hero-grid">
+                <div>
+                    <span class="badge">Bảng điều khiển</span>
+                    <h2>Vận hành website quản lý sản phẩm an toàn với Spring Security</h2>
+                    <p>
+                        Bạn có thể quản lý danh mục, sản phẩm và bảng giá theo từng thời điểm hiệu lực.
+                        Tài khoản `staff` chỉ được xem dữ liệu, tài khoản `admin` có quyền chỉnh sửa.
+                    </p>
+                    <div class="actions">
+                        <a class="btn" th:href="@{/products}">Quản lý sản phẩm</a>
+                        <a class="btn btn-secondary" th:href="@{/prices}">Quản lý bảng giá</a>
+                        <a class="btn btn-light" th:href="@{/categories}">Danh mục</a>
+                    </div>
+                </div>
+                <div class="stat-grid">
+                    <article class="stat-card">
+                        <h3 th:text="${totalProducts}">0</h3>
+                        <p>Tổng sản phẩm</p>
+                    </article>
+                    <article class="stat-card">
+                        <h3 th:text="${activeProducts}">0</h3>
+                        <p>Sản phẩm đang hoạt động</p>
+                    </article>
+                    <article class="stat-card">
+                        <h3 th:text="${totalCategories}">0</h3>
+                        <p>Danh mục</p>
+                    </article>
+                    <article class="stat-card">
+                        <h3 th:text="${totalPriceEntries}">0</h3>
+                        <p>Dòng bảng giá</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="quick-links">
+            <a class="quick-link" th:href="@{/categories}">
+                <h3>Danh mục</h3>
+                <p>Xây dựng cấu trúc sản phẩm trước khi nhập hàng loạt.</p>
+            </a>
+            <a class="quick-link" th:href="@{/products}">
+                <h3>Sản phẩm</h3>
+                <p>Tập trung vào SKU, trạng thái và thông tin phân loại.</p>
+            </a>
+            <a class="quick-link" th:href="@{/prices}">
+                <h3>Bảng giá</h3>
+                <p>Quản lý nhiều mức giá theo ngày hiệu lực.</p>
+            </a>
         </section>
     </main>
 </body>

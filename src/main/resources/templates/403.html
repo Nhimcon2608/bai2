@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Không có quyền truy cập</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body class="auth-body">
+<main class="auth-wrap">
+    <section class="glass-panel auth-card">
+        <span class="badge">403</span>
+        <h1>Không có quyền truy cập</h1>
+        <p class="subtitle">Tài khoản hiện tại không có quyền cho thao tác này. Hãy dùng tài khoản admin để chỉnh sửa dữ liệu.</p>
+        <div class="actions">
+            <a class="btn" th:href="@{/}">Về dashboard</a>
+            <a class="btn btn-light" th:href="@{/products}">Xem sản phẩm</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

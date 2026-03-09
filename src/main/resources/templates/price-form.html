@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${formTitle + ' - Product Hub'}">Bảng giá - Product Hub</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body>
+<main class="page">
+    <section class="glass-panel form-panel">
+        <h2 th:text="${formTitle}">Thêm dòng bảng giá</h2>
+        <p class="subtitle">Thiết lập loại giá, giá trị và ngày bắt đầu áp dụng.</p>
+
+        <form class="form-grid" th:action="${formAction}" method="post" th:object="${priceEntry}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div>
+                <label for="productId">Sản phẩm</label>
+                <select id="productId" name="productId">
+                    <option value="">-- Chọn sản phẩm --</option>
+                    <option th:each="product : ${products}"
+                            th:value="${product.id}"
+                            th:text="${product.name + ' (' + product.sku + ')'}"
+                            th:selected="${selectedProductId != null and selectedProductId == product.id}">
+                    </option>
+                </select>
+                <p class="field-error" th:if="${#fields.hasErrors('product')}" th:errors="*{product}"></p>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <label for="priceType">Loại giá</label>
+                    <select id="priceType" th:field="*{priceType}">
+                        <option value="">-- Chọn loại giá --</option>
+                        <option th:each="type : ${priceTypes}" th:value="${type}" th:text="${type.label}"></option>
+                    </select>
+                    <p class="field-error" th:if="${#fields.hasErrors('priceType')}" th:errors="*{priceType}"></p>
+                </div>
+                <div>
+                    <label for="effectiveDate">Ngày hiệu lực</label>
+                    <input type="date" id="effectiveDate" th:field="*{effectiveDate}">
+                    <p class="field-error" th:if="${#fields.hasErrors('effectiveDate')}" th:errors="*{effectiveDate}"></p>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <label for="price">Giá</label>
+                    <input type="number" id="price" th:field="*{price}" step="0.01" min="0.01">
+                    <p class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p>
+                </div>
+                <div>
+                    <label for="currency">Tiền tệ</label>
+                    <input type="text" id="currency" th:field="*{currency}" maxlength="3" placeholder="VND">
+                    <p class="field-error" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></p>
+                </div>
+            </div>
+
+            <div>
+                <label for="note">Ghi chú</label>
+                <textarea id="note" th:field="*{note}" rows="3"
+                          placeholder="Ví dụ: áp dụng kênh showroom quý II"></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></p>
+            </div>
+
+            <div class="actions">
+                <button class="btn" type="submit" th:text="${submitLabel}">Lưu</button>
+                <a class="btn btn-light" th:href="@{/prices}">Quay lại</a>
+                <a class="btn btn-secondary" th:href="@{/}">Dashboard</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

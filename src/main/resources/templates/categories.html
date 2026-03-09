@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục - Product Hub</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <div>
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand">Danh mục sản phẩm</h1>
+        </div>
+        <div class="header-actions">
+            <a class="btn btn-light" th:href="@{/}">Dashboard</a>
+            <a class="btn btn-light" th:href="@{/products}">Sản phẩm</a>
+            <a class="btn btn-light" th:href="@{/prices}">Bảng giá</a>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="page page-wide">
+    <section class="glass-panel">
+        <div class="topbar">
+            <div>
+                <h2>Danh sách danh mục</h2>
+                <p class="subtitle">Quản lý nhóm sản phẩm để lọc và báo cáo dễ dàng.</p>
+            </div>
+            <a class="btn" th:href="@{/categories/new}" sec:authorize="hasRole('ADMIN')">+ Thêm danh mục</a>
+        </div>
+
+        <div class="flash success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="flash error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th>Ngày tạo</th>
+                    <th sec:authorize="hasRole('ADMIN')">Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(categories)}">
+                    <td colspan="5" class="empty-row">Chưa có danh mục nào.</td>
+                </tr>
+                <tr th:each="category : ${categories}">
+                    <td th:text="${category.id}">1</td>
+                    <td th:text="${category.name}">Điện tử</td>
+                    <td th:text="${category.description ?: 'Không có mô tả'}">Mô tả</td>
+                    <td th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')}">09/03/2026</td>
+                    <td class="actions-cell" sec:authorize="hasRole('ADMIN')">
+                        <a class="btn btn-small btn-secondary" th:href="@{/categories/{id}/edit(id=${category.id})}">Sửa</a>
+                        <form th:action="@{/categories/{id}/delete(id=${category.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn btn-small btn-danger" type="submit"
+                                    onclick="return confirm('Xóa danh mục này?');">Xóa
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>
