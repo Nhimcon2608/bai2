@@ -6,53 +6,99 @@
     <title>Sản phẩm - Product Hub</title>
     <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
 </head>
-<body>
+<body class="theme-products site-shell">
 <header class="site-header">
     <div class="header-inner">
-        <div>
+        <div class="header-brand">
             <p class="eyebrow">Product Hub</p>
-            <h1 class="brand">Quản lý sản phẩm</h1>
+            <h1 class="brand">Catalog sản phẩm</h1>
+            <p class="header-note">Tìm kiếm, sắp xếp, lọc và đặt hàng ngay từ danh sách sản phẩm.</p>
         </div>
+
+        <nav class="header-nav">
+            <a class="nav-link" sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/}">Dashboard</a>
+            <a class="nav-link current" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/categories}">Danh mục</a>
+            <a class="nav-link" sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/prices}">Bảng giá</a>
+            <a class="nav-link" th:href="@{/cart}">Giỏ hàng (<span th:text="${cartItemCount}">0</span>)</a>
+        </nav>
+
         <div class="header-actions">
-            <a class="btn btn-light" th:href="@{/}">Dashboard</a>
-            <a class="btn btn-light" th:href="@{/categories}">Danh mục</a>
-            <a class="btn btn-light" th:href="@{/prices}">Bảng giá</a>
+            <p class="user-chip">
+                <span>Tài khoản:</span>
+                <strong sec:authentication="name">user</strong>
+            </p>
+            <span class="role-pill customer" sec:authorize="hasRole('CUSTOMER')">Customer view</span>
+            <span class="role-pill staff" sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">Staff view</span>
+            <span class="role-pill admin" sec:authorize="hasRole('ADMIN')">Admin view</span>
             <form th:action="@{/logout}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button class="btn" type="submit">Đăng xuất</button>
+                <button class="btn btn-light" type="submit">Đăng xuất</button>
             </form>
         </div>
     </div>
 </header>
 
-<main class="page page-wide">
-    <section class="glass-panel">
-        <div class="topbar">
-            <div>
-                <h2>Danh sách sản phẩm</h2>
-                <p class="subtitle">Theo dõi SKU, trạng thái và phân loại sản phẩm.</p>
+<main class="page page-wide stack-lg">
+    <section class="glass-panel table-card">
+        <div class="table-toolbar">
+            <div class="table-title">
+                <span class="page-marker">Catalog Search</span>
+                <h3>Danh sách sản phẩm</h3>
+                <p class="section-note">Tìm theo tên, lọc theo danh mục, sắp xếp theo giá và phân trang 5 sản phẩm mỗi trang.</p>
             </div>
-            <a class="btn" th:href="@{/products/new}" sec:authorize="hasRole('ADMIN')">+ Thêm sản phẩm</a>
+
+            <div class="toolbar-side">
+                <div class="table-meta">
+                    <span class="meta-chip" th:text="'Tổng ' + ${catalogPage.totalItems} + ' sản phẩm'">Tổng 0 sản phẩm</span>
+                    <span class="meta-chip" th:text="'Trang ' + ${catalogPage.currentPage} + '/' + ${catalogPage.totalPages}">Trang 1/1</span>
+                    <span class="meta-chip" th:text="'Giỏ hàng ' + ${cartItemCount}">Giỏ hàng 0</span>
+                </div>
+                <a class="btn btn-secondary" th:href="@{/products/new}" sec:authorize="hasRole('ADMIN')">+ Thêm sản phẩm</a>
+                <a class="btn btn-light" th:href="@{/cart}">Mở giỏ hàng</a>
+            </div>
         </div>
 
         <form class="filter-inline" th:action="@{/products}" method="get">
-            <label for="categoryId">Lọc theo danh mục</label>
-            <select id="categoryId" name="categoryId">
-                <option value="">Tất cả</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category.id}"
-                        th:text="${category.name}"
-                        th:selected="${selectedCategoryId != null and selectedCategoryId == category.id}">
-                </option>
-            </select>
-            <button class="btn btn-small" type="submit">Lọc</button>
+            <div class="filter-group">
+                <label for="keyword">Keyword</label>
+                <input id="keyword" type="text" name="keyword" th:value="${keyword}" placeholder="Nhập tên sản phẩm">
+            </div>
+
+            <div class="filter-group">
+                <label for="categoryId">Danh mục</label>
+                <select id="categoryId" name="categoryId">
+                    <option value="">Tất cả</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.id}"
+                            th:text="${category.name}"
+                            th:selected="${selectedCategoryId != null and selectedCategoryId == category.id}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="sort">Sắp xếp</label>
+                <select id="sort" name="sort">
+                    <option value="newest" th:selected="${selectedSort == 'newest'}">Mặc định</option>
+                    <option value="priceAsc" th:selected="${selectedSort == 'priceAsc'}">Giá tăng dần</option>
+                    <option value="priceDesc" th:selected="${selectedSort == 'priceDesc'}">Giá giảm dần</option>
+                </select>
+            </div>
+
+            <button class="btn btn-small" type="submit">Tìm kiếm</button>
             <a class="btn btn-small btn-light" th:href="@{/products}">Reset</a>
         </form>
 
         <div class="flash success" th:if="${successMessage}" th:text="${successMessage}"></div>
         <div class="flash error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
-        <div class="table-wrap">
+        <div class="empty-state" th:if="${catalogPage.empty}">
+            <strong>Không tìm thấy sản phẩm phù hợp.</strong>
+            Hãy đổi keyword, category hoặc sort để xem thêm kết quả.
+        </div>
+
+        <div class="table-wrap" th:if="${!catalogPage.empty}">
             <table>
                 <thead>
                 <tr>
@@ -60,31 +106,50 @@
                     <th>SKU</th>
                     <th>Tên sản phẩm</th>
                     <th>Danh mục</th>
+                    <th>Giá hiện tại</th>
                     <th>Trạng thái</th>
                     <th>Cập nhật</th>
+                    <th>Thêm vào giỏ</th>
                     <th sec:authorize="hasRole('ADMIN')">Hành động</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${#lists.isEmpty(products)}">
-                    <td colspan="7" class="empty-row">Không có sản phẩm nào theo bộ lọc hiện tại.</td>
-                </tr>
-                <tr th:each="product : ${products}">
-                    <td th:text="${product.id}">1</td>
-                    <td><span class="chip" th:text="${product.sku}">SKU-001</span></td>
+                <tr th:each="item : ${catalogPage.items}">
+                    <td th:text="${item.id}">1</td>
+                    <td><span class="chip" th:text="${item.sku}">SKU-001</span></td>
                     <td>
-                        <strong th:text="${product.name}">Tên SP</strong>
-                        <p class="muted-cell" th:text="${product.description ?: 'Không có mô tả'}">Mô tả</p>
+                        <strong th:text="${item.name}">Tên sản phẩm</strong>
+                        <p class="muted-cell" th:text="${item.description ?: 'Không có mô tả'}">Mô tả</p>
                     </td>
-                    <td th:text="${product.category.name}">Danh mục</td>
+                    <td th:text="${item.categoryName}">Danh mục</td>
                     <td>
-                        <span th:classappend="${product.active} ? 'status on' : 'status off'"
-                              th:text="${product.active} ? 'Đang bán' : 'Ngừng bán'"></span>
+                        <strong th:if="${item.currentPrice != null}"
+                                th:text="${#numbers.formatDecimal(item.currentPrice, 1, 'COMMA', 0, 'POINT') + ' ' + item.currency}">
+                            21,990,000 VND
+                        </strong>
+                        <span class="chip" th:if="${item.currentPrice == null}">Chưa có giá</span>
                     </td>
-                    <td th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy HH:mm')}">09/03/2026</td>
+                    <td>
+                        <span th:classappend="${item.active} ? 'status on' : 'status off'"
+                              th:text="${item.active} ? 'Đang bán' : 'Ngừng bán'"></span>
+                    </td>
+                    <td th:text="${#temporals.format(item.updatedAt, 'dd/MM/yyyy HH:mm')}">09/03/2026</td>
+                    <td>
+                        <form class="actions-cell" th:if="${item.currentPrice != null}" th:action="@{/cart/add}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="productId" th:value="${item.id}">
+                            <input type="hidden" name="keyword" th:value="${keyword}">
+                            <input type="hidden" name="categoryId" th:value="${selectedCategoryId}">
+                            <input type="hidden" name="sort" th:value="${selectedSort}">
+                            <input type="hidden" name="page" th:value="${catalogPage.currentPage}">
+                            <input class="qty-input" type="number" name="quantity" value="1" min="1">
+                            <button class="btn btn-small" type="submit">Thêm</button>
+                        </form>
+                        <span class="muted-cell" th:if="${item.currentPrice == null}">Chưa thể đặt hàng</span>
+                    </td>
                     <td class="actions-cell" sec:authorize="hasRole('ADMIN')">
-                        <a class="btn btn-small btn-secondary" th:href="@{/products/{id}/edit(id=${product.id})}">Sửa</a>
-                        <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post">
+                        <a class="btn btn-small btn-secondary" th:href="@{/products/{id}/edit(id=${item.id})}">Sửa</a>
+                        <form th:action="@{/products/{id}/delete(id=${item.id})}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <button class="btn btn-small btn-danger" type="submit"
                                     onclick="return confirm('Xóa sản phẩm này?');">Xóa
@@ -94,6 +159,30 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="pagination-bar" th:if="${catalogPage.totalPages > 1}">
+            <div class="actions">
+                <a class="btn btn-light btn-small"
+                   th:if="${catalogPage.hasPrevious}"
+                   th:href="@{/products(page=${catalogPage.currentPage - 1}, keyword=${keyword}, categoryId=${selectedCategoryId}, sort=${selectedSort})}">
+                    Previous
+                </a>
+                <span class="page-summary" th:if="${!catalogPage.hasPrevious}">Bạn đang ở trang đầu tiên.</span>
+            </div>
+
+            <p class="page-summary" th:text="'Hiển thị tối đa ' + ${catalogPage.pageSize} + ' sản phẩm mỗi trang.'">
+                Hiển thị tối đa 5 sản phẩm mỗi trang.
+            </p>
+
+            <div class="actions">
+                <span class="page-summary" th:if="${!catalogPage.hasNext}">Bạn đang ở trang cuối.</span>
+                <a class="btn btn-light btn-small"
+                   th:if="${catalogPage.hasNext}"
+                   th:href="@{/products(page=${catalogPage.currentPage + 1}, keyword=${keyword}, categoryId=${selectedCategoryId}, sort=${selectedSort})}">
+                    Next
+                </a>
+            </div>
         </div>
     </section>
 </main>

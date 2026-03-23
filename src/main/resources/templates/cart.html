@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - Product Hub</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body class="theme-cart site-shell">
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand">Giỏ hàng</h1>
+            <p class="header-note">Lưu trong session, có quantity và tổng tiền trước khi checkout.</p>
+        </div>
+
+        <nav class="header-nav">
+            <a class="nav-link" sec:authorize="hasAnyRole('ADMIN','STAFF')" th:href="@{/}">Dashboard</a>
+            <a class="nav-link" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link current" th:href="@{/cart}">Giỏ hàng</a>
+        </nav>
+
+        <div class="header-actions">
+            <p class="user-chip">
+                <span>Tài khoản:</span>
+                <strong sec:authentication="name">customer</strong>
+            </p>
+            <span class="role-pill customer" sec:authorize="hasRole('CUSTOMER')">Customer cart</span>
+            <span class="role-pill staff" sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">Staff cart</span>
+            <span class="role-pill admin" sec:authorize="hasRole('ADMIN')">Admin cart</span>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn btn-light" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="page page-wide stack-lg">
+    <div class="flash success" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="flash error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <section class="cart-layout">
+        <section class="glass-panel table-card">
+            <div class="table-toolbar">
+                <div class="table-title">
+                    <span class="page-marker">Session Cart</span>
+                    <h3>Sản phẩm đã chọn</h3>
+                    <p class="section-note">Danh sách này được lưu trong session và cập nhật quantity ngay tại chỗ.</p>
+                </div>
+                <div class="toolbar-side">
+                    <a class="btn btn-light" th:href="@{/products}">Tiếp tục mua</a>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${cart.empty}">
+                <strong>Giỏ hàng của bạn đang trống.</strong>
+                Quay lại trang sản phẩm để thêm sản phẩm trước khi checkout.
+            </div>
+
+            <div class="table-wrap" th:if="${!cart.empty}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tổng tiền</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${cart.items}">
+                        <td>
+                            <strong th:text="${item.productName}">Tên sản phẩm</strong>
+                            <p class="muted-cell" th:text="${item.sku}">SKU</p>
+                        </td>
+                        <td th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 0, 'POINT') + ' ' + item.currency}">
+                            21,990,000 VND
+                        </td>
+                        <td>
+                            <form class="actions-cell" th:action="@{/cart/update}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="productId" th:value="${item.productId}">
+                                <input class="qty-input" type="number" name="quantity" min="0" th:value="${item.quantity}">
+                                <button class="btn btn-small" type="submit">Cập nhật</button>
+                            </form>
+                        </td>
+                        <td th:text="${#numbers.formatDecimal(item.lineTotal, 1, 'COMMA', 0, 'POINT') + ' ' + item.currency}">
+                            43,980,000 VND
+                        </td>
+                        <td>
+                            <form th:action="@{/cart/remove}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="productId" th:value="${item.productId}">
+                                <button class="btn btn-small btn-danger" type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="glass-panel cart-summary">
+            <div class="form-intro">
+                <span class="badge">Order Summary</span>
+                <h2>Tóm tắt đơn hàng</h2>
+                <p class="subtitle">Kiểm tra tổng số lượng và tổng tiền trước khi tạo Order.</p>
+            </div>
+
+            <article class="summary-pill">
+                <strong th:text="${cart.totalQuantity}">0</strong>
+                <span>Tổng số lượng</span>
+                <small>Tổng tất cả item trong session cart.</small>
+            </article>
+
+            <article class="summary-pill">
+                <strong th:text="${#numbers.formatDecimal(cart.totalAmount, 1, 'COMMA', 0, 'POINT')}">0</strong>
+                <span th:text="${'Tổng tiền (' + cart.currency + ')'}">Tổng tiền (VND)</span>
+                <small>Sẽ được lưu vào `Order.totalAmount` khi checkout.</small>
+            </article>
+
+            <form th:if="${!cart.empty}" th:action="@{/cart/checkout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn" type="submit">Đặt hàng</button>
+            </form>
+        </aside>
+    </section>
+</main>
+</body>
+</html>

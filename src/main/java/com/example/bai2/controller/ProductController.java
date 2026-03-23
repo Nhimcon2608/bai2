@@ -1,8 +1,10 @@
 package com.example.bai2.controller;
 
 import com.example.bai2.model.Product;
+import com.example.bai2.service.CartService;
 import com.example.bai2.service.CategoryService;
 import com.example.bai2.service.ProductService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,17 +25,29 @@ public class ProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final CartService cartService;
 
-    public ProductController(ProductService productService, CategoryService categoryService) {
+    public ProductController(ProductService productService, CategoryService categoryService, CartService cartService) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.cartService = cartService;
     }
 
     @GetMapping
-    public String listProducts(@RequestParam(required = false) Long categoryId, Model model) {
-        model.addAttribute("products", productService.getAllProducts(categoryId));
+    public String listProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "newest") String sort,
+            @RequestParam(defaultValue = "1") int page,
+            Model model,
+            HttpSession session
+    ) {
+        model.addAttribute("catalogPage", productService.getProductCatalog(keyword, categoryId, sort, page));
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("selectedSort", sort);
+        model.addAttribute("cartItemCount", cartService.getCartItemCount(session));
         return "products";
     }
 

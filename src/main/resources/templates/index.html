@@ -6,77 +6,166 @@
     <title>Dashboard - Product Hub</title>
     <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
 </head>
-<body>
-    <header class="site-header">
-        <div class="header-inner">
-            <div>
-                <p class="eyebrow">Product Hub</p>
-                <h1 class="brand">Quản trị sản phẩm</h1>
-            </div>
-            <div class="header-actions">
-                <p class="user-chip">
-                    <span>Xin chào,</span>
-                    <strong sec:authentication="name">admin</strong>
-                </p>
-                <form th:action="@{/logout}" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button class="btn btn-light" type="submit">Đăng xuất</button>
-                </form>
-            </div>
+<body class="theme-dashboard site-shell">
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand">Bảng điều phối vận hành</h1>
+            <p class="header-note">Theo dõi danh mục, sản phẩm và giá theo một góc nhìn phù hợp với vai trò hiện tại.</p>
         </div>
-    </header>
 
-    <main class="page page-wide">
-        <section class="glass-panel">
-            <div class="hero-grid">
-                <div>
-                    <span class="badge">Bảng điều khiển</span>
-                    <h2>Vận hành website quản lý sản phẩm an toàn với Spring Security</h2>
-                    <p>
-                        Bạn có thể quản lý danh mục, sản phẩm và bảng giá theo từng thời điểm hiệu lực.
-                        Tài khoản `staff` chỉ được xem dữ liệu, tài khoản `admin` có quyền chỉnh sửa.
-                    </p>
-                    <div class="actions">
-                        <a class="btn" th:href="@{/products}">Quản lý sản phẩm</a>
-                        <a class="btn btn-secondary" th:href="@{/prices}">Quản lý bảng giá</a>
-                        <a class="btn btn-light" th:href="@{/categories}">Danh mục</a>
-                    </div>
+        <nav class="header-nav">
+            <a class="nav-link current" th:href="@{/}">Dashboard</a>
+            <a class="nav-link" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" th:href="@{/categories}">Danh mục</a>
+            <a class="nav-link" th:href="@{/prices}">Bảng giá</a>
+        </nav>
+
+        <div class="header-actions">
+            <p class="user-chip">
+                <span>Đăng nhập:</span>
+                <strong sec:authentication="name">admin</strong>
+            </p>
+            <span class="role-pill admin" sec:authorize="hasRole('ADMIN')">Admin mode</span>
+            <span class="role-pill staff" sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">Staff mode</span>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn btn-light" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="page page-wide stack-lg">
+    <section class="glass-panel hero-panel">
+        <div class="hero-grid">
+            <div class="hero-copy">
+                <span class="badge">Control Tower</span>
+                <h2>Điều phối danh mục, tồn tại sản phẩm và nhịp cập nhật giá theo đúng vai trò.</h2>
+
+                <p sec:authorize="hasRole('ADMIN')">
+                    Bạn đang ở chế độ quản trị toàn phần: có thể chỉnh danh mục, tạo SKU mới, cập nhật giá và xử lý các thay đổi
+                    dữ liệu trực tiếp từ từng khu vực vận hành.
+                </p>
+                <p sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">
+                    Bạn đang ở chế độ vận hành đọc dữ liệu: phù hợp để rà soát danh mục, kiểm tra SKU và đối chiếu bảng giá
+                    mà không chạm vào dữ liệu gốc.
+                </p>
+
+                <div class="actions">
+                    <a class="btn" th:href="@{/products}">Đi tới sản phẩm</a>
+                    <a class="btn btn-secondary" th:href="@{/prices}">Xem bảng giá</a>
+                    <a class="btn btn-light" th:href="@{/categories}">Mở danh mục</a>
                 </div>
-                <div class="stat-grid">
+
+                <div class="summary-strip">
+                    <article class="summary-pill">
+                        <strong th:text="${totalProducts}">0</strong>
+                        <span>Tổng SKU đang quản lý</span>
+                        <small>Toàn bộ sản phẩm đã nhập hệ thống.</small>
+                    </article>
+                    <article class="summary-pill">
+                        <strong th:text="${activeProducts}">0</strong>
+                        <span>Sản phẩm đang hoạt động</span>
+                        <small>Các mã đang mở bán hoặc còn hiệu lực vận hành.</small>
+                    </article>
+                    <article class="summary-pill">
+                        <strong th:text="${totalPriceEntries}">0</strong>
+                        <span>Dòng giá đang theo dõi</span>
+                        <small>Gồm bán lẻ, online, sỉ và khuyến mãi.</small>
+                    </article>
+                </div>
+            </div>
+
+            <div class="hero-aside">
+                <div class="hero-kpis">
                     <article class="stat-card">
                         <h3 th:text="${totalProducts}">0</h3>
                         <p>Tổng sản phẩm</p>
                     </article>
                     <article class="stat-card">
                         <h3 th:text="${activeProducts}">0</h3>
-                        <p>Sản phẩm đang hoạt động</p>
+                        <p>Sản phẩm đang bán</p>
                     </article>
                     <article class="stat-card">
                         <h3 th:text="${totalCategories}">0</h3>
-                        <p>Danh mục</p>
+                        <p>Danh mục đang dùng</p>
                     </article>
                     <article class="stat-card">
                         <h3 th:text="${totalPriceEntries}">0</h3>
-                        <p>Dòng bảng giá</p>
+                        <p>Mốc giá hiệu lực</p>
                     </article>
                 </div>
-            </div>
-        </section>
 
-        <section class="quick-links">
-            <a class="quick-link" th:href="@{/categories}">
-                <h3>Danh mục</h3>
-                <p>Xây dựng cấu trúc sản phẩm trước khi nhập hàng loạt.</p>
+                <article class="scope-card" sec:authorize="hasRole('ADMIN')">
+                    <h3>Quyền của admin</h3>
+                    <ul>
+                        <li>Tạo và chỉnh danh mục để giữ cấu trúc catalog rõ ràng.</li>
+                        <li>Thêm hoặc cập nhật SKU khi có sản phẩm mới.</li>
+                        <li>Điều chỉnh bảng giá theo từng loại và ngày hiệu lực.</li>
+                    </ul>
+                </article>
+
+                <article class="scope-card" sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">
+                    <h3>Quyền của staff</h3>
+                    <ul>
+                        <li>Kiểm tra dữ liệu xuyên suốt giữa sản phẩm, danh mục và giá.</li>
+                        <li>Lọc nhanh để phục vụ kiểm tra nội bộ hoặc đối soát.</li>
+                        <li>Không có quyền tạo, sửa hoặc xóa dữ liệu.</li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-grid">
+        <div class="resource-grid">
+            <a class="resource-card" th:href="@{/products}">
+                <span class="page-marker">SKU Desk</span>
+                <h3>Không gian sản phẩm</h3>
+                <p>Theo dõi SKU, tình trạng bán và mô tả chi tiết trong cùng một bảng dễ rà soát.</p>
             </a>
-            <a class="quick-link" th:href="@{/products}">
-                <h3>Sản phẩm</h3>
-                <p>Tập trung vào SKU, trạng thái và thông tin phân loại.</p>
+            <a class="resource-card" th:href="@{/categories}">
+                <span class="page-marker">Taxonomy Lane</span>
+                <h3>Không gian danh mục</h3>
+                <p>Giữ cấu trúc nhóm hàng gọn, tránh trùng lặp và giúp lọc báo cáo chính xác hơn.</p>
             </a>
-            <a class="quick-link" th:href="@{/prices}">
-                <h3>Bảng giá</h3>
-                <p>Quản lý nhiều mức giá theo ngày hiệu lực.</p>
+            <a class="resource-card" th:href="@{/prices}">
+                <span class="page-marker">Pricing Desk</span>
+                <h3>Không gian bảng giá</h3>
+                <p>Tập trung theo dõi từng loại giá và mốc hiệu lực thay vì chỉnh rải rác theo sản phẩm.</p>
             </a>
-        </section>
-    </main>
+        </div>
+
+        <article class="insight-card">
+            <h3>Nhịp làm việc gợi ý</h3>
+            <p sec:authorize="hasRole('ADMIN')">
+                Bắt đầu từ danh mục nếu đang mở nhóm hàng mới, sau đó tạo SKU ở khu vực sản phẩm và chốt giá tại bảng giá
+                để tránh thiếu dữ liệu liên kết.
+            </p>
+            <p sec:authorize="hasRole('STAFF') and !hasRole('ADMIN')">
+                Ưu tiên mở trang sản phẩm để kiểm tra SKU và trạng thái, rồi chuyển sang bảng giá khi cần đối chiếu mức áp dụng.
+            </p>
+            <div class="summary-strip">
+                <article class="summary-pill">
+                    <strong>1</strong>
+                    <span>Danh mục</span>
+                    <small>Dùng khi cần rà lại cấu trúc nhóm sản phẩm.</small>
+                </article>
+                <article class="summary-pill">
+                    <strong>2</strong>
+                    <span>Sản phẩm</span>
+                    <small>Trung tâm theo dõi SKU và tình trạng hoạt động.</small>
+                </article>
+                <article class="summary-pill">
+                    <strong>3</strong>
+                    <span>Bảng giá</span>
+                    <small>Khóa lại giá trị và thời điểm hiệu lực.</small>
+                </article>
+            </div>
+        </article>
+    </section>
+</main>
 </body>
 </html>

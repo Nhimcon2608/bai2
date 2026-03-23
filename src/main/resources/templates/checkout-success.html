@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt hàng thành công - Product Hub</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
+</head>
+<body class="theme-success site-shell">
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand">Checkout thành công</h1>
+            <p class="header-note">Order và Order Detail đã được lưu xuống database.</p>
+        </div>
+
+        <nav class="header-nav">
+            <a class="nav-link" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" th:href="@{/cart}">Giỏ hàng</a>
+            <a class="nav-link current" th:href="@{/cart/success(orderId=${order.id})}">Hoàn tất</a>
+        </nav>
+
+        <div class="header-actions">
+            <p class="user-chip">
+                <span>Tài khoản:</span>
+                <strong sec:authentication="name">customer</strong>
+            </p>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn btn-light" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="page page-wide stack-lg">
+    <div class="flash success" th:if="${successMessage}" th:text="${successMessage}"></div>
+
+    <section class="glass-panel hero-panel">
+        <div class="hero-grid">
+            <div class="hero-copy">
+                <span class="badge">Checkout Success</span>
+                <h2>Đơn hàng đã được tạo thành công.</h2>
+                <p>
+                    Mã đơn <strong th:text="${order.id}">1</strong> được tạo vào
+                    <strong th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">09/03/2026 12:00</strong>.
+                    Tài khoản đặt hàng: <strong th:text="${order.accountUsername ?: 'Khách vãng lai'}">customer</strong>.
+                </p>
+                <div class="actions">
+                    <a class="btn" th:href="@{/products}">Tiếp tục mua hàng</a>
+                    <a class="btn btn-light" th:href="@{/cart}">Quay lại giỏ hàng</a>
+                </div>
+            </div>
+
+            <div class="hero-aside">
+                <article class="summary-pill">
+                    <strong th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT')}">0</strong>
+                    <span>Tổng tiền đơn hàng</span>
+                    <small>Giá trị được lưu trong `Order.totalAmount`.</small>
+                </article>
+                <article class="summary-pill">
+                    <strong th:text="${#lists.size(order.orderDetails)}">0</strong>
+                    <span>Dòng đơn hàng</span>
+                    <small>Mỗi sản phẩm trong giỏ tạo ra một `OrderDetail`.</small>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="glass-panel">
+        <div class="table-title">
+            <span class="page-marker">Order Detail</span>
+            <h3>Chi tiết sản phẩm đã đặt</h3>
+            <p class="section-note">Tên sản phẩm, giá, số lượng và tổng tiền của từng dòng đơn hàng.</p>
+        </div>
+
+        <div class="order-list">
+            <article class="order-item" th:each="detail : ${order.orderDetails}">
+                <strong th:text="${detail.product.name}">Tên sản phẩm</strong>
+                <p class="muted-text" th:text="${detail.product.sku}">SKU</p>
+                <p th:text="${'Giá: ' + #numbers.formatDecimal(detail.price, 1, 'COMMA', 0, 'POINT') + ' VND'}">Giá</p>
+                <p th:text="${'Số lượng: ' + detail.quantity}">Số lượng</p>
+                <p th:text="${'Thành tiền: ' + #numbers.formatDecimal(detail.price * detail.quantity, 1, 'COMMA', 0, 'POINT') + ' VND'}">
+                    Thành tiền
+                </p>
+            </article>
+        </div>
+    </section>
+</main>
+</body>
+</html>

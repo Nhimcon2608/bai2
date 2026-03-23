@@ -23,13 +23,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/css/**", "/images/**", "/js/**").permitAll()
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/", "/home", "/products", "/categories", "/prices").hasAnyRole("ADMIN", "STAFF")
+                        .requestMatchers(HttpMethod.GET, "/products").hasAnyRole("ADMIN", "STAFF", "CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/", "/home", "/categories", "/prices")
+                        .hasAnyRole("ADMIN", "STAFF")
+                        .requestMatchers("/cart/**").authenticated()
                         .requestMatchers("/products/**", "/categories/**", "/prices/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler((request, response, authentication) -> {
+                            boolean isCustomer = authentication.getAuthorities().stream()
+                                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_CUSTOMER"));
+                            response.sendRedirect(request.getContextPath() + (isCustomer ? "/products" : "/"));
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -53,7 +60,12 @@ public class SecurityConfig {
                 .roles("STAFF")
                 .build();
 
-        return new InMemoryUserDetailsManager(admin, staff);
+        UserDetails customer = User.withUsername("customer")
+                .password(passwordEncoder.encode("customer123"))
+                .roles("CUSTOMER")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, staff, customer);
     }
 
     @Bean

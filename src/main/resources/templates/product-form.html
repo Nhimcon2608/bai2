@@ -6,59 +6,113 @@
     <title th:text="${formTitle + ' - Product Hub'}">Sản phẩm - Product Hub</title>
     <link rel="stylesheet" th:href="@{/css/library.css}" href="/css/library.css">
 </head>
-<body>
-<main class="page">
-    <section class="glass-panel form-panel">
-        <h2 th:text="${formTitle}">Thêm sản phẩm</h2>
-        <p class="subtitle">Thiết lập thông tin sản phẩm, danh mục và trạng thái kinh doanh.</p>
+<body class="theme-form-product site-shell">
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <p class="eyebrow">Product Hub</p>
+            <h1 class="brand" th:text="${formTitle}">Thêm sản phẩm</h1>
+            <p class="header-note">Màn hình này tập trung vào việc tạo hoặc cập nhật SKU với ít bước chuyển trang nhất.</p>
+        </div>
 
-        <form class="form-grid" th:action="${formAction}" method="post" th:object="${product}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <nav class="header-nav">
+            <a class="nav-link" th:href="@{/}">Dashboard</a>
+            <a class="nav-link current" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" th:href="@{/categories}">Danh mục</a>
+            <a class="nav-link" th:href="@{/prices}">Bảng giá</a>
+        </nav>
 
-            <div class="grid-2">
-                <div>
-                    <label for="sku">SKU</label>
-                    <input type="text" id="sku" th:field="*{sku}" placeholder="Ví dụ: IP15-128-BLK">
-                    <p class="field-error" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></p>
+        <div class="header-actions">
+            <a class="btn btn-light" th:href="@{/products}">Quay lại danh sách</a>
+        </div>
+    </div>
+</header>
+
+<main class="page form-workspace">
+    <section class="form-layout">
+        <aside class="glass-panel form-sidebar">
+            <div class="form-intro">
+                <span class="badge">SKU Builder</span>
+                <h2 th:text="${formTitle}">Thêm sản phẩm</h2>
+                <p th:text="${#strings.startsWith(formTitle, 'Thêm') ? 'Tạo SKU mới với danh mục và trạng thái bán rõ ràng ngay từ đầu.' : 'Điều chỉnh SKU hiện có mà vẫn giữ dữ liệu phân loại và mô tả nhất quán.'}">
+                    Tạo SKU mới với danh mục và trạng thái bán rõ ràng ngay từ đầu.
+                </p>
+            </div>
+
+            <article class="form-note-card">
+                <h3>Những gì nên kiểm tra trước khi lưu</h3>
+                <ul class="guide-list">
+                    <li>SKU nên ngắn gọn, dễ dò và không trùng với mã đang có.</li>
+                    <li>Tên sản phẩm đủ rõ để phân biệt các phiên bản gần giống nhau.</li>
+                    <li>Danh mục phải đúng để customer và staff lọc sản phẩm chính xác.</li>
+                </ul>
+            </article>
+
+            <article class="form-note-card">
+                <h3>Luồng làm việc đề xuất</h3>
+                <ul class="guide-list">
+                    <li>Tạo hoặc chọn đúng danh mục trước khi nhập SKU mới.</li>
+                    <li>Lưu sản phẩm xong thì chuyển qua bảng giá để chốt mức bán.</li>
+                    <li>Dùng trạng thái hoạt động để kiểm soát SKU có xuất hiện hay không.</li>
+                </ul>
+            </article>
+        </aside>
+
+        <section class="glass-panel form-main">
+            <div class="form-intro">
+                <span class="page-marker">Catalog Editing</span>
+                <h2>Thông tin sản phẩm</h2>
+                <p class="subtitle">Biểu mẫu được sắp xếp theo thứ tự nhập liệu thường dùng: nhận diện SKU, phân loại, mô tả, trạng thái.</p>
+            </div>
+
+            <form class="form-grid" th:action="${formAction}" method="post" th:object="${product}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <div class="grid-2">
+                    <div>
+                        <label for="sku">SKU</label>
+                        <input type="text" id="sku" th:field="*{sku}" placeholder="Ví dụ: IP15-128-BLK">
+                        <p class="field-error" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></p>
+                    </div>
+                    <div>
+                        <label for="name">Tên sản phẩm</label>
+                        <input type="text" id="name" th:field="*{name}" placeholder="Ví dụ: iPhone 15 128GB">
+                        <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                    </div>
                 </div>
+
                 <div>
-                    <label for="name">Tên sản phẩm</label>
-                    <input type="text" id="name" th:field="*{name}" placeholder="Ví dụ: iPhone 15 128GB">
-                    <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                    <label for="categoryId">Danh mục</label>
+                    <select id="categoryId" name="categoryId">
+                        <option value="">-- Chọn danh mục --</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.id}"
+                                th:text="${category.name}"
+                                th:selected="${selectedCategoryId != null and selectedCategoryId == category.id}">
+                        </option>
+                    </select>
+                    <p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></p>
                 </div>
-            </div>
 
-            <div>
-                <label for="categoryId">Danh mục</label>
-                <select id="categoryId" name="categoryId">
-                    <option value="">-- Chọn danh mục --</option>
-                    <option th:each="category : ${categories}"
-                            th:value="${category.id}"
-                            th:text="${category.name}"
-                            th:selected="${selectedCategoryId != null and selectedCategoryId == category.id}">
-                    </option>
-                </select>
-                <p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></p>
-            </div>
+                <div>
+                    <label for="description">Mô tả</label>
+                    <textarea id="description" th:field="*{description}" rows="5"
+                              placeholder="Thông tin nổi bật, cấu hình, ghi chú ngắn về sản phẩm..."></textarea>
+                    <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+                </div>
 
-            <div>
-                <label for="description">Mô tả</label>
-                <textarea id="description" th:field="*{description}" rows="4"
-                          placeholder="Thông tin nổi bật, cấu hình, ghi chú..."></textarea>
-                <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
-            </div>
+                <div class="check-line">
+                    <input type="checkbox" id="active" th:field="*{active}">
+                    <label for="active">Sản phẩm đang hoạt động và có thể xuất hiện trong quy trình bán</label>
+                </div>
 
-            <div class="check-line">
-                <input type="checkbox" id="active" th:field="*{active}">
-                <label for="active">Sản phẩm đang hoạt động</label>
-            </div>
-
-            <div class="actions">
-                <button class="btn" type="submit" th:text="${submitLabel}">Lưu</button>
-                <a class="btn btn-light" th:href="@{/products}">Quay lại</a>
-                <a class="btn btn-secondary" th:href="@{/}">Dashboard</a>
-            </div>
-        </form>
+                <div class="actions">
+                    <button class="btn" type="submit" th:text="${submitLabel}">Lưu</button>
+                    <a class="btn btn-light" th:href="@{/products}">Quay lại</a>
+                    <a class="btn btn-secondary" th:href="@{/prices}">Đi tiếp sang bảng giá</a>
+                </div>
+            </form>
+        </section>
     </section>
 </main>
 </body>
