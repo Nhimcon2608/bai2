@@ -46,7 +46,8 @@ class SecurityAccessTests {
     void loginPageRenders() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Role-based Workspace")));
+                .andExpect(content().string(containsString("Đăng nhập")))
+                .andExpect(content().string(containsString("Nhập tài khoản và mật khẩu để tiếp tục.")));
     }
 
     @Test
@@ -86,7 +87,7 @@ class SecurityAccessTests {
     void customerForbiddenPageRenders() throws Exception {
         mockMvc.perform(get("/403"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Tài khoản customer chỉ được xem trang sản phẩm")));
+                .andExpect(content().string(containsString("Tài khoản customer chỉ được xem trang sản phẩm và giỏ hàng.")));
     }
 
     @Test
@@ -94,15 +95,15 @@ class SecurityAccessTests {
     void staffPagesRender() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Bảng điều phối vận hành")));
+                .andExpect(content().string(containsString("Tổng quan")));
 
         mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Xưởng cấu trúc danh mục")));
+                .andExpect(content().string(containsString("Danh mục")));
 
         mockMvc.perform(get("/prices"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Bàn theo dõi bảng giá")));
+                .andExpect(content().string(containsString("Bảng giá")));
     }
 
     @Test
@@ -110,14 +111,14 @@ class SecurityAccessTests {
     void adminFormPagesRender() throws Exception {
         mockMvc.perform(get("/products/new"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("SKU Builder")));
+                .andExpect(content().string(containsString("Thông tin sản phẩm")));
 
         mockMvc.perform(get("/categories/new"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Taxonomy Builder")));
+                .andExpect(content().string(containsString("Thông tin danh mục")));
 
         mockMvc.perform(get("/prices/new"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Pricing Editor")));
+                .andExpect(content().string(containsString("Thông tin dòng bảng giá")));
     }
 }
